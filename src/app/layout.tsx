@@ -3,6 +3,7 @@ import { AppBar, Toolbar, Typography, Button, Container } from '@mui/material'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Link from 'next/link'
+import ResponsiveAppBar from '../../components/header'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -19,18 +20,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Container>
-          <AppBar position="static">
-            <Toolbar>
-              <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                My App
-              </Typography>
-              <Button component={Link} href="/" color="inherit">Home</Button>
-            </Toolbar>
-          </AppBar>
-          <Container sx={{ marginTop: '1rem' }}>
-            {children}
-          </Container>
+        <Container maxWidth="xl">
+          <ResponsiveAppBar />
+          {children}
         </Container>
       </body>
     </html>
