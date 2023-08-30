@@ -16,13 +16,26 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Box,
+  Stack,
 } from '@mui/material';
 import { Delete, Edit, Check, Close } from '@mui/icons-material';
 
+interface INote {
+  value: string;
+  date: string;
+}
+
 function NotePage() {
-  const [notes, setNotes] = useState<string[]>([]);
+  const [notes, setNotes] = useState<INote[]>([]);
   const [editNoteIndex, setEditNoteIndex] = useState<number | null>(null);
-  const [editedNote, setEditedNote] = useState('');
+  const [editedNote, setEditedNote] = useState<INote | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [deleteNoteIndex, setDeleteNoteIndex] = useState<number | null>(null);
 
@@ -30,13 +43,15 @@ function NotePage() {
     newNote: Yup.string().required('The field is required'),
   });
 
-  const addNote = (values: { newNote: string; }) => {
-    setNotes([...notes, values.newNote]);
-    setEditedNote(''); // Clear the edited note after adding
+  const addNote = (newNote: string) => {
+    const currentDate = new Date();
+    const formattedDate = currentDate.toISOString();
+    var note: INote = { value: newNote, date: formattedDate }
+    setNotes([...notes, note]);
+    setEditedNote(null);
   };
 
   const deleteNote = (index: number | null) => {
-    console.log('aqui');
     const updatedNotes = notes.filter((_, i) => i !== index);
     setNotes(updatedNotes);
     setEditNoteIndex(null);
@@ -50,13 +65,15 @@ function NotePage() {
   };
 
   const saveEditedNote = () => {
-    if (editedNote.trim() !== '') {
-      if (editNoteIndex !== null) {
+    if (editedNote?.value.trim() !== '') {
+      if (editNoteIndex !== null && editedNote !== null) {
         const updatedNotes = [...notes];
+        const currentDate = new Date();
+        const formattedDate = currentDate.toISOString();
         updatedNotes[editNoteIndex] = editedNote;
         setNotes(updatedNotes);
         setEditNoteIndex(null);
-        setEditedNote('');
+        setEditedNote(null);
       }
     }
   };
@@ -72,107 +89,141 @@ function NotePage() {
   };
 
   return (
-    <div>
-      <Typography variant="h4">Lista de Notas</Typography>
+    <Stack>
+      <Box sx={{ mt: 2, mb: 2 }}>
+        <Typography variant="h4" sx={{ mb: 1 }}>Notes List</Typography>
+        <Formik
+          initialValues={{ newNote: '' }}
+          validationSchema={validationSchema}
+          onSubmit={(values, actions) => {
+            if (values.newNote.trim() !== '') {
+              const currentDate = new Date();
+              addNote(values.newNote);
+              actions.resetForm();
+            }
+          }}
+        >
+          {({ isSubmitting, values, touched, errors, handleChange, handleBlur, handleSubmit }) => (
+            <form
+              noValidate
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit();
+              }}
+            >
+              <Stack sx={{ display: 'flex', flexDirection: 'row' }}>
+                <TextField
+                  sx={{ mr: 2 }}
+                  type="text"
+                  name="newNote"
+                  label="New Note"
+                  variant="outlined"
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.newNote}
+                  error={touched.newNote && Boolean(errors.newNote)}
+                  helperText={touched.newNote && errors.newNote}
+                />
+                <Button type="submit" variant="contained" color="primary" sx={{ height: 'auto' }}>
+                  Add Note
+                </Button>
+              </Stack>
 
-      <Formik
-        initialValues={{ newNote: '' }}
-        validationSchema={validationSchema}
-        onSubmit={(values, actions) => {
-          if (values.newNote.trim() !== '') {
-            addNote(values);
-            actions.resetForm();
-          }
-        }}
-      >
-        {({ isSubmitting, values, touched, errors, handleChange, handleBlur, handleSubmit }) => (
-          <form
-            className='w-full'
-            noValidate
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSubmit();
-            }}
-          >
-            <TextField
-              type="text"
-              name="newNote"
-              label="Nueva Nota"
-              variant="outlined"
-              fullWidth
-              onChange={handleChange}
-              onBlur={handleBlur}
-              value={values.newNote}
-              error={touched.newNote && Boolean(errors.newNote)}
-              helperText={touched.newNote && errors.newNote}
-            />
+            </form>
+          )}
+        </Formik>
+      </Box>
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Order</TableCell>
+              <TableCell>Note</TableCell>
+              <TableCell>Date</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {notes.map((note: INote, index: number) => (
+              <TableRow key={index}>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>
+                  {index === editNoteIndex ? (
+                    <Formik
+                      initialValues={{ editedNote: note?.value }}
+                      validationSchema={Yup.object().shape({
+                        editedNote: Yup.string().required('This field is required'),
+                      })}
+                      onSubmit={saveEditedNote}
+                    >
+                      {({ isSubmitting }) => (
+                        <Form>
+                          <Box>
+                            <TextField
+                              sx={{ mb: 1 }}
+                              type="text"
+                              name="editedNote"
+                              label="Editar Nota"
+                              variant="outlined"
+                              value={editedNote?.value}
+                              fullWidth
+                              onChange={(e) => setEditedNote({
+                                ...editedNote,
+                                value: e.target.value,
+                                date: new Date().toISOString(),
+                              })}
+                            />
+                            < ErrorMessage name="editedNote" component="div" className="error-message" />
+                          </Box>
+                          <Box sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                          }}>
+                            <Button
+                              type="submit"
+                              variant="outlined"
+                              color="primary"
+                              startIcon={<Check sx={{ color: 'green' }} />}
+                              fullWidth
+                              sx={{ mr: 0.5 }}
+                            >
 
+                            </Button>
+                            <Button
+                              variant="outlined"
+                              color="secondary"
+                              onClick={() => setEditNoteIndex(null)}
+                              startIcon={<Close sx={{ color: 'red' }} />}
+                              fullWidth
+                              sx={{ ml: 0.5 }}
+                            >
 
-            <Button type="submit" variant="contained" color="primary">
-              Add Note
-            </Button>
-          </form>
-        )}
-      </Formik>
+                            </Button>
+                          </Box>
 
-      <List>
-        {notes.map((note, index) => (
-          <ListItem key={index}>
-            {index === editNoteIndex ? (
-              <>
-                <Formik
-                  initialValues={{ editedNote }}
-                  onSubmit={saveEditedNote}
-                >
-                  {({ isSubmitting }) => (
-                    <Form>
-                      <TextField
-                        type="text"
-                        name="editedNote"
-                        label="Editar Nota"
-                        variant="outlined"
-                        value={editedNote}
-                        onChange={(e) => setEditedNote(e.target.value)}
-                        fullWidth
-                      />
-                      <ErrorMessage name="editedNote" component="div" className="error-message" />
-                      <Button
-                        type="submit"
-                        disabled={isSubmitting}
-                        variant="contained"
-                        color="primary"
-                        startIcon={<Check />}
-                      >
-                        Guardar
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        color="secondary"
-                        onClick={() => setEditNoteIndex(null)}
-                        startIcon={<Close />}
-                      >
-                        Cancelar
-                      </Button>
-                    </Form>
+                        </Form>
+                      )}
+                    </Formik>
+                  ) : (
+                    <>
+                      {note?.value}
+                    </>
                   )}
-                </Formik>
-              </>
-            ) : (
-              <>
-                <ListItemText primary={note} />
-                <ListItemSecondaryAction>
+                </TableCell>
+                <TableCell>{note?.date}</TableCell>
+                <TableCell>
                   <IconButton onClick={() => editNote(index)} color="primary">
                     <Edit />
                   </IconButton>
                   <IconButton onClick={() => openDeleteConfirmation(index)} color="secondary">
                     <Delete />
                   </IconButton>
-                </ListItemSecondaryAction>
-              </>
-            )}
-          </ListItem>
-        ))}
-      </List>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
       <Dialog open={openDialog} onClose={closeDeleteConfirmation}>
         <DialogTitle>Confirmar Eliminación</DialogTitle>
@@ -193,7 +244,7 @@ function NotePage() {
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </Stack>
   );
 }
 

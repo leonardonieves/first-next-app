@@ -3,7 +3,7 @@ import { AppBar, Toolbar, Typography, Button, Container } from '@mui/material'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Link from 'next/link'
-import ResponsiveAppBar from '../../components/header'
+import ResponsiveAppBar from '../components/header'
 
 const inter = Inter({ subsets: ['latin'] })
 
