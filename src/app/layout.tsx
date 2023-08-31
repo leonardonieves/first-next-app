@@ -1,5 +1,5 @@
 import { AppBar, Toolbar, Typography, Button, Container } from '@mui/material'
-// import './globals.css'
+import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Link from 'next/link'

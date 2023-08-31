@@ -179,11 +179,12 @@ function ResponsiveAppBar() {
                             open={Boolean(anchorElUser)}
                             onClose={handleCloseUserMenu}
                         >
-                            {settings.map((setting) => (
-                                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                                    <Typography textAlign="center">{setting}</Typography>
-                                </MenuItem>
-                            ))}
+                            <MenuItem key={'profile'} onClick={handleCloseUserMenu}>
+                                <Link href="/profile"><Typography textAlign="center">Profile</Typography></Link>
+                            </MenuItem>
+                            <MenuItem key={'account'} onClick={handleCloseUserMenu}>
+                                <Link href="/account"><Typography textAlign="center">Account</Typography></Link>
+                            </MenuItem>
                         </Menu>
                     </Box>
                 </Toolbar>
