@@ -13,7 +13,7 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.6",
     "@mui/material": "^5.14.6",
-    "@prisma/client": "^5.2.0",
+    "@prisma/client": "^4.6.1",
     "@types/node": "20.4.8",
     "@types/react": "18.2.19",
     "@types/react-dom": "18.2.7",
@@ -30,6 +30,6 @@
     "yup": "^1.2.0"
   },
   "devDependencies": {
-    "prisma": "^5.2.0"
+    "prisma": "^4.6.1"
   }
 }
